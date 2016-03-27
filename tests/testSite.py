@@ -6,6 +6,7 @@ import lsst.utils.tests as utilsTests
 
 from lsst.sims.utils import Site
 
+
 class SiteTest(unittest.TestCase):
 
     def setUp(self):
@@ -17,7 +18,6 @@ class SiteTest(unittest.TestCase):
         self.humidity = 0.4
         self.pressure = 750.0
         self.lapseRate = 0.0065
-
 
     def testLSST_values(self):
         """
@@ -35,7 +35,6 @@ class SiteTest(unittest.TestCase):
         self.assertEqual(site.humidity, self.humidity)
         self.assertEqual(site.lapseRate, self.lapseRate)
         self.assertEqual(site.height, self.height)
-
 
     def testNoDefaults(self):
         """
@@ -66,7 +65,6 @@ class SiteTest(unittest.TestCase):
         self.assertIsNone(site.lapseRate)
         self.assertIsNone(site.height)
 
-
     def testOverrideLSSTdefaults(self):
         """
         Test that, even if LSST is specified, we are capable of overriding
@@ -96,7 +94,6 @@ class SiteTest(unittest.TestCase):
         self.assertEqual(site.humidity, self.humidity)
         self.assertEqual(site.lapseRate, self.lapseRate)
         self.assertEqual(site.height, self.height)
-
 
         site = Site(name='LSST', height=4.0)
         self.assertEqual(site.name, 'LSST')
@@ -199,6 +196,7 @@ def suite():
     suites += unittest.makeSuite(SiteTest)
 
     return unittest.TestSuite(suites)
+
 
 def run(shouldExit=False):
     """Run the tests"""

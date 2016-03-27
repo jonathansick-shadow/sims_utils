@@ -16,7 +16,7 @@ __all__ = ["_altAzPaFromRaDec", "altAzPaFromRaDec",
            "getRotTelPos", "_getRotTelPos",
            "getRotSkyPos", "_getRotSkyPos",
            "calcObsDefaults", "makeObservationMetadata", "makeObsParamsAzAltTel",
-           "makeObsParamsAzAltSky", "makeObsParamsRaDecTel", "makeObsParamsRaDecSky",]
+           "makeObsParamsAzAltSky", "makeObsParamsRaDecTel", "makeObsParamsRaDecSky", ]
 
 
 def altAzPaFromRaDec(ra, dec, obs):
@@ -44,7 +44,6 @@ def altAzPaFromRaDec(ra, dec, obs):
                                     obs)
 
     return np.degrees(alt), np.degrees(az), np.degrees(pa)
-
 
 
 def _altAzPaFromRaDec(raRad, decRad, obs):
@@ -83,19 +82,19 @@ def _altAzPaFromRaDec(raRad, decRad, obs):
         raise RuntimeError('passed numpy array of Dec to altAzPaFromRaDec; but only one RA')
 
     if raIsArray and decIsArray and len(raRad) != len(decRad):
-        raise RuntimeError('in altAzPaFromRaDec length of RA numpy array does not match length of Dec numpy array')
-
+        raise RuntimeError(
+            'in altAzPaFromRaDec length of RA numpy array does not match length of Dec numpy array')
 
     if not hasattr(raRad, '__len__'):
         raObs_temp, decObs_temp = _observedFromICRS(np.array([raRad]), np.array([decRad]), obs_metadata=obs,
-                                                      includeRefraction=True, epoch=2000.0)
+                                                    includeRefraction=True, epoch=2000.0)
 
         raObs = raObs_temp[0]
         decObs = decObs_temp[0]
 
-
     else:
-        raObs, decObs = _observedFromICRS(raRad, decRad, obs_metadata=obs, epoch=2000.0, includeRefraction=True)
+        raObs, decObs = _observedFromICRS(raRad, decRad, obs_metadata=obs,
+                                          epoch=2000.0, includeRefraction=True)
 
     lst = calcLmstLast(obs.mjd.UT1, obs.site.longitude_rad)
     last = lst[1]
@@ -103,12 +102,12 @@ def _altAzPaFromRaDec(raRad, decRad, obs):
 
     if isinstance(haRad, np.ndarray):
         az, azd, azdd, \
-        alt, altd, altdd, \
-        pa, pad, padd = palpy.altazVector(haRad, decObs, obs.site.latitude_rad)
+            alt, altd, altdd, \
+            pa, pad, padd = palpy.altazVector(haRad, decObs, obs.site.latitude_rad)
     else:
         az, azd, azdd, \
-        alt, altd, altdd, \
-        pa, pad, padd = palpy.altaz(haRad, decObs, obs.site.latitude_rad)
+            alt, altd, altdd, \
+            pa, pad, padd = palpy.altaz(haRad, decObs, obs.site.latitude_rad)
 
     return alt, az, pa
 
@@ -169,18 +168,19 @@ def _raDecFromAltAz(altRad, azRad, obs):
     if azIsArray and not altIsArray:
         raise RuntimeError('passed a numpy array of az to raDecFromAltAz, but only one alt')
 
-    if azIsArray and altIsArray and len(altRad)!=len(azRad):
-        raise RuntimeError('in raDecFromAltAz, length of alt numpy array does not match length of az numpy array')
+    if azIsArray and altIsArray and len(altRad) != len(azRad):
+        raise RuntimeError(
+            'in raDecFromAltAz, length of alt numpy array does not match length of az numpy array')
 
     lst = calcLmstLast(obs.mjd.UT1, obs.site.longitude_rad)
     last = lst[1]
     sinAlt = np.sin(altRad)
     cosLat = np.cos(obs.site.latitude_rad)
     sinLat = np.sin(obs.site.latitude_rad)
-    decObs = np.arcsin(sinLat*sinAlt+ cosLat*np.cos(altRad)*np.cos(azRad))
+    decObs = np.arcsin(sinLat*sinAlt + cosLat*np.cos(altRad)*np.cos(azRad))
     costheta = (sinAlt - np.sin(decObs)*sinLat)/(np.cos(decObs)*cosLat)
     if altIsArray:
-        haRad0 =  np.arccos(costheta)
+        haRad0 = np.arccos(costheta)
         # Make sure there were no NaNs
         nanSpots = np.where(np.isnan(haRad0))[0]
         if np.size(nanSpots) > 0:
@@ -188,12 +188,12 @@ def _raDecFromAltAz(altRad, azRad, obs):
     else:
         haRad0 = np.arccos(costheta)
         if np.isnan(haRad0):
-            if np.sign(costheta)>0.0:
+            if np.sign(costheta) > 0.0:
                 haRad0 = 0.0
             else:
                 haRad0 = np.pi
 
-    haRad = np.where(np.sin(azRad)>=0.0, -1.0*haRad0, haRad0)
+    haRad = np.where(np.sin(azRad) >= 0.0, -1.0*haRad0, haRad0)
     raObs = np.radians(last*15.) - haRad
 
     if not hasattr(raObs, '__len__'):
@@ -202,7 +202,6 @@ def _raDecFromAltAz(altRad, azRad, obs):
                                           includeRefraction=True)
 
         return raRad[0], decRad[0]
-
 
     raRad, decRad = _icrsFromObserved(raObs, decObs,
                                       obs_metadata=obs, epoch=2000.0,
@@ -241,7 +240,6 @@ def getRotSkyPos(ra, dec, obs, rotTel):
                            obs, np.radians(rotTel))
 
     return np.degrees(rotSky)
-
 
 
 def _getRotSkyPos(raRad, decRad, obs, rotTelRad):
@@ -377,7 +375,7 @@ def calcObsDefaults(raRad, decRad, altRad, azRad, rotTelRad, mjd, band, longRad,
     headers of its input InstanceCatalogs
     """
     obsMd = {}
-    #Defaults
+    # Defaults
     obsTemp = ObservationMetaData(mjd=mjd, site=Site(longitude=np.degrees(longRad),
                                                      latitude=np.degrees(latRad), name='LSST'))
     moonra, moondec = _raDecFromAltAz(-np.pi/2., 0., obsTemp)
@@ -402,8 +400,8 @@ def calcObsDefaults(raRad, decRad, altRad, azRad, rotTelRad, mjd, band, longRad,
 
 
 def makeObservationMetadata(metaData):
-    return OrderedDict([(k,(metaData[k], np.asarray(metaData[k]).dtype))
-                         for k in metaData])
+    return OrderedDict([(k, (metaData[k], np.asarray(metaData[k]).dtype))
+                        for k in metaData])
 
 
 def makeObsParamsAzAltTel(azRad, altRad, mjd, band, rotTelRad=0., longRad=-1.2320792, latRad=-0.517781017, **kwargs):
@@ -420,7 +418,7 @@ def makeObsParamsAzAltTel(azRad, altRad, mjd, band, rotTelRad=0., longRad=-1.232
     '''
 
     obsTemp = ObservationMetaData(mjd=mjd, site=Site(longitude=np.degrees(longRad), latitude=np.degrees(latRad),
-                                                 name='LSST'))
+                                                     name='LSST'))
 
     raRad, decRad = _raDecFromAltAz(altRad, azRad, obsTemp)
     obsMd = calcObsDefaults(raRad, decRad, altRad, azRad, rotTelRad, mjd, band, longRad, latRad)

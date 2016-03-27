@@ -8,8 +8,8 @@ from lsst.sims.utils import _raDecFromPupilCoords
 from lsst.sims.utils import _observedFromICRS, _icrsFromObserved
 from lsst.sims.utils import haversine, arcsecFromRadians, solarRaDec, ModifiedJulianDate, distanceToSun
 
-class PupilCoordinateUnitTest(unittest.TestCase):
 
+class PupilCoordinateUnitTest(unittest.TestCase):
 
     def testExceptions(self):
         """
@@ -26,44 +26,43 @@ class PupilCoordinateUnitTest(unittest.TestCase):
         raShort = numpy.array([1.0])
         decShort = numpy.array([1.0])
 
-        #test without epoch
+        # test without epoch
         self.assertRaises(RuntimeError, _pupilCoordsFromRaDec, ra, dec,
                           obs_metadata=obs_metadata)
 
-        #test without obs_metadata
+        # test without obs_metadata
         self.assertRaises(RuntimeError, _pupilCoordsFromRaDec, ra, dec,
                           epoch=2000.0)
 
-        #test without pointingRA
+        # test without pointingRA
         dummy = ObservationMetaData(pointingDec=obs_metadata.pointingDec,
                                     rotSkyPos=obs_metadata.rotSkyPos,
                                     mjd=obs_metadata.mjd)
         self.assertRaises(RuntimeError, _pupilCoordsFromRaDec, ra, dec,
                           epoch=2000.0, obs_metadata=dummy)
 
-        #test without pointingDec
+        # test without pointingDec
         dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
                                     rotSkyPos=obs_metadata.rotSkyPos,
                                     mjd=obs_metadata.mjd)
         self.assertRaises(RuntimeError, _pupilCoordsFromRaDec, ra, dec,
                           epoch=2000.0, obs_metadata=dummy)
 
-        #test without rotSkyPos
+        # test without rotSkyPos
         dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
                                     pointingDec=obs_metadata.pointingDec,
                                     mjd=obs_metadata.mjd)
         self.assertRaises(RuntimeError, _pupilCoordsFromRaDec, ra, dec,
                           epoch=2000.0, obs_metadata=dummy)
 
-        #test without mjd
+        # test without mjd
         dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
                                     pointingDec=obs_metadata.pointingDec,
                                     rotSkyPos=obs_metadata.rotSkyPos)
         self.assertRaises(RuntimeError, _pupilCoordsFromRaDec, ra, dec,
                           epoch=2000.0, obs_metadata=dummy)
 
-
-        #test for mismatches
+        # test for mismatches
         dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
                                     pointingDec=obs_metadata.pointingDec,
                                     rotSkyPos=obs_metadata.rotSkyPos,
@@ -75,9 +74,8 @@ class PupilCoordinateUnitTest(unittest.TestCase):
         self.assertRaises(RuntimeError, _pupilCoordsFromRaDec, raShort, dec, epoch=2000.0,
                           obs_metadata=dummy)
 
-        #test that it actually runs
+        # test that it actually runs
         test = _pupilCoordsFromRaDec(ra, dec, obs_metadata=obs_metadata, epoch=2000.0)
-
 
     def testCardinalDirections(self):
         """
@@ -116,7 +114,6 @@ class PupilCoordinateUnitTest(unittest.TestCase):
         raList = numpy.random.random_sample(10)*360.0
         decList = numpy.random.random_sample(10)*180.0 - 90.0
 
-
         for rotSkyPos in numpy.arange(-90.0, 181.0, 90.0):
             for ra, dec in zip(raList, decList):
                 obs = ObservationMetaData(pointingRA=ra,
@@ -141,24 +138,25 @@ class PupilCoordinateUnitTest(unittest.TestCase):
                 lon, lat = _nativeLonLatFromRaDec(raTest, decTest, obs)
                 rr = numpy.abs(numpy.cos(lat)/numpy.sin(lat))
 
-                if numpy.abs(rotSkyPos)<0.01:
+                if numpy.abs(rotSkyPos) < 0.01:
                     control_x = numpy.array([-1.0*rr[0], 1.0*rr[1], 0.0, 0.0])
                     control_y = numpy.array([0.0, 0.0, 1.0*rr[2], -1.0*rr[3]])
-                elif numpy.abs(rotSkyPos+90.0)<0.01:
+                elif numpy.abs(rotSkyPos+90.0) < 0.01:
                     control_x = numpy.array([0.0, 0.0, 1.0*rr[2], -1.0*rr[3]])
                     control_y = numpy.array([1.0*rr[0], -1.0*rr[1], 0.0, 0.0])
-                elif numpy.abs(rotSkyPos-90.0)<0.01:
+                elif numpy.abs(rotSkyPos-90.0) < 0.01:
                     control_x = numpy.array([0.0, 0.0, -1.0*rr[2], 1.0*rr[3]])
                     control_y = numpy.array([-1.0*rr[0], 1.0*rr[1], 0.0, 0.0])
-                elif numpy.abs(rotSkyPos-180.0)<0.01:
+                elif numpy.abs(rotSkyPos-180.0) < 0.01:
                     control_x = numpy.array([1.0*rr[0], -1.0*rr[1], 0.0, 0.0])
                     control_y = numpy.array([0.0, 0.0, -1.0*rr[2], 1.0*rr[3]])
 
-                dx = numpy.array([xx/cc if numpy.abs(cc)>1.0e-10 else 1.0-xx for xx, cc in zip(x, control_x)])
-                dy = numpy.array([yy/cc if numpy.abs(cc)>1.0e-10 else 1.0-yy for yy, cc in zip(y, control_y)])
+                dx = numpy.array([xx/cc if numpy.abs(cc) > 1.0e-10 else 1.0 -
+                                  xx for xx, cc in zip(x, control_x)])
+                dy = numpy.array([yy/cc if numpy.abs(cc) > 1.0e-10 else 1.0 -
+                                  yy for yy, cc in zip(y, control_y)])
                 numpy.testing.assert_array_almost_equal(dx, numpy.ones(4), decimal=4)
                 numpy.testing.assert_array_almost_equal(dy, numpy.ones(4), decimal=4)
-
 
     def testRaDecFromPupil(self):
         """
@@ -190,9 +188,8 @@ class PupilCoordinateUnitTest(unittest.TestCase):
         dex = numpy.argmax(distance)
         worstSolarDistance = distanceToSun(numpy.degrees(ra[dex]), numpy.degrees(dec[dex]), mjd.TDB)
         msg = "_raDecFromPupilCoords off by %e arcsec at distance to Sun of %e degrees" % \
-        (distance.max(), worstSolarDistance)
+            (distance.max(), worstSolarDistance)
         self.assertLess(distance.max(), 0.005, msg=msg)
-
 
     def testNaNs(self):
         """
@@ -203,11 +200,11 @@ class PupilCoordinateUnitTest(unittest.TestCase):
         nSamples = 100
         numpy.random.seed(42)
         raList = numpy.radians(numpy.random.random_sample(nSamples)*2.0 + 42.0)
-        decList = numpy.radians(numpy.random.random_sample(nSamples)*2.0 -28.0)
+        decList = numpy.radians(numpy.random.random_sample(nSamples)*2.0 - 28.0)
 
         xControl, yControl = _pupilCoordsFromRaDec(raList, decList,
-                                                       obs_metadata=obs,
-                                                       epoch=2000.0)
+                                                   obs_metadata=obs,
+                                                   epoch=2000.0)
 
         raList[5] = numpy.NaN
         decList[5] = numpy.NaN
@@ -216,12 +213,12 @@ class PupilCoordinateUnitTest(unittest.TestCase):
         raList[30] = numpy.radians(42.0) + numpy.pi
 
         xTest, yTest = _pupilCoordsFromRaDec(raList, decList,
-                                                 obs_metadata=obs,
-                                                 epoch=2000.0)
+                                             obs_metadata=obs,
+                                             epoch=2000.0)
 
         for ix, (xc, yc, xt, yt) in \
-        enumerate(zip(xControl, yControl, xTest, yTest)):
-            if ix!=5 and ix!=15 and ix!=20 and ix!=30:
+                enumerate(zip(xControl, yControl, xTest, yTest)):
+            if ix != 5 and ix != 15 and ix != 20 and ix != 30:
                 self.assertAlmostEqual(xc, xt, 10)
                 self.assertAlmostEqual(yc, yt, 10)
                 self.assertFalse(numpy.isnan(xt))
@@ -237,8 +234,9 @@ def suite():
     suites += unittest.makeSuite(PupilCoordinateUnitTest)
     return unittest.TestSuite(suites)
 
+
 def run(shouldExit=False):
-    utilsTests.run(suite(),shouldExit)
+    utilsTests.run(suite(), shouldExit)
 
 if __name__ == "__main__":
     run(True)

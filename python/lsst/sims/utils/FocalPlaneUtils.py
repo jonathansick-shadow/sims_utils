@@ -87,11 +87,12 @@ def _pupilCoordsFromRaDec(ra_in, dec_in, obs_metadata=None, epoch=None):
     if epoch is None:
         raise RuntimeError("Cannot call pupilCoordsFromRaDec; epoch is None")
 
-    if len(ra_in)!=len(dec_in):
-        raise RuntimeError("You passed %d RAs but %d Decs to pupilCoordsFromRaDec" % (len(ra_in), len(dec_in)))
+    if len(ra_in) != len(dec_in):
+        raise RuntimeError("You passed %d RAs but %d Decs to pupilCoordsFromRaDec" %
+                           (len(ra_in), len(dec_in)))
 
     if obs_metadata.rotSkyPos is None:
-        #there is no observation meta data on which to base astrometry
+        # there is no observation meta data on which to base astrometry
         raise RuntimeError("Cannot calculate [x,y]_focal_nominal without obs_metadata.rotSkyPos")
 
     if obs_metadata.pointingRA is None or obs_metadata.pointingDec is None:
@@ -110,8 +111,8 @@ def _pupilCoordsFromRaDec(ra_in, dec_in, obs_metadata=None, epoch=None):
     ra_pointing = ra_pointing_temp[0]
     dec_pointing = dec_pointing_temp[0]
 
-    #palpy.ds2tp performs the gnomonic projection on ra_in and dec_in
-    #with a tangent point at (pointingRA, pointingDec)
+    # palpy.ds2tp performs the gnomonic projection on ra_in and dec_in
+    # with a tangent point at (pointingRA, pointingDec)
     #
     try:
         x, y = palpy.ds2tpVector(ra_obs, dec_obs, ra_pointing, dec_pointing)
@@ -165,7 +166,7 @@ def raDecFromPupilCoords(xPupil, yPupil, obs_metadata=None, epoch=None):
     """
 
     output = _raDecFromPupilCoords(xPupil, yPupil, obs_metadata=obs_metadata,
-                                               epoch=epoch)
+                                   epoch=epoch)
 
     return np.degrees(output)
 
@@ -193,19 +194,19 @@ def _raDecFromPupilCoords(xPupil, yPupil, obs_metadata=None, epoch=None):
         raise RuntimeError("Cannot call raDecFromPupilCoords; epoch is None")
 
     if obs_metadata.rotSkyPos is None:
-        raise RuntimeError("Cannot call raDecFromPupilCoords without rotSkyPos " + \
+        raise RuntimeError("Cannot call raDecFromPupilCoords without rotSkyPos " +
                            "in obs_metadata")
 
     if obs_metadata.pointingRA is None or obs_metadata.pointingDec is None:
-        raise RuntimeError("Cannot call raDecFromPupilCoords "+ \
-                          "without pointingRA, pointingDec in obs_metadata")
+        raise RuntimeError("Cannot call raDecFromPupilCoords " +
+                           "without pointingRA, pointingDec in obs_metadata")
 
     if obs_metadata.mjd is None:
-        raise RuntimeError("Cannot calculate x_pupil, y_pupil without mjd " + \
+        raise RuntimeError("Cannot calculate x_pupil, y_pupil without mjd " +
                            "in obs_metadata")
 
-    if len(xPupil)!=len(yPupil):
-        raise RuntimeError("You passed %d RAs but %d Decs into raDecFromPupilCoords" % \
+    if len(xPupil) != len(yPupil):
+        raise RuntimeError("You passed %d RAs but %d Decs into raDecFromPupilCoords" %
                            (len(raObj), len(decObj)))
 
     ra_pointing_temp, dec_pointing_temp = _observedFromICRS(np.array([obs_metadata._pointingRA]),
@@ -216,8 +217,8 @@ def _raDecFromPupilCoords(xPupil, yPupil, obs_metadata=None, epoch=None):
     ra_pointing = ra_pointing_temp[0]
     dec_pointing = dec_pointing_temp[0]
 
-    #This is the same as theta in pupilCoordsFromRaDec, except without the minus sign.
-    #This is because we will be reversing the rotation performed in that other method.
+    # This is the same as theta in pupilCoordsFromRaDec, except without the minus sign.
+    # This is because we will be reversing the rotation performed in that other method.
     theta = -1.0*obs_metadata._rotSkyPos
 
     x_g = xPupil*np.cos(theta) - yPupil*np.sin(theta)

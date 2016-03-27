@@ -25,8 +25,9 @@ def controlEquationOfEquinoxes(mjd):
     epsilonDegrees = 23.4393 - 0.0000004*D
     return (deltaPsiHours/24.0)*2.0*numpy.pi*numpy.cos(numpy.radians(epsilonDegrees))
 
+
 def controlCalcGmstGast(mjd):
-    #From http://aa.usno.navy.mil/faq/docs/GAST.php Nov. 9 2013
+    # From http://aa.usno.navy.mil/faq/docs/GAST.php Nov. 9 2013
     mjdConv = 2400000.5
     jd2000 = 2451545.0
     mjd_o = numpy.floor(mjd)
@@ -41,6 +42,7 @@ def controlCalcGmstGast(mjd):
     gmst %= 24.
     gast %= 24.
     return gmst, gast
+
 
 class testCoordinateTransformations(unittest.TestCase):
 
@@ -74,18 +76,17 @@ class testCoordinateTransformations(unittest.TestCase):
         ans = utils.calcLmstLast(mjdFloat, longFloat)
         ans = utils.calcLmstLast(mjd2, longList)
 
-
     def testEquationOfEquinoxes(self):
         """
         Test equation of equninoxes calculation
         """
 
-        #test vectorized version
+        # test vectorized version
         control = controlEquationOfEquinoxes(self.mjd)
         test = utils.equationOfEquinoxes(self.mjd)
         self.assertTrue(numpy.abs(test-control).max() < self.tolerance)
 
-        #test non-vectorized version
+        # test non-vectorized version
         for mm in self.mjd:
             control = controlEquationOfEquinoxes(mm)
             test = utils.equationOfEquinoxes(mm)
@@ -101,7 +102,7 @@ class testCoordinateTransformations(unittest.TestCase):
         self.assertTrue(numpy.abs(testGmst - controlGmst).max() < self.tolerance)
         self.assertTrue(numpy.abs(testGast - controlGast).max() < self.tolerance)
 
-        #test non-vectorized version
+        # test non-vectorized version
         for mm in self.mjd:
             controlGmst, controlGast = controlCalcGmstGast(mm)
             testGmst, testGast = utils.calcGmstGast(mm)
@@ -127,7 +128,7 @@ class testCoordinateTransformations(unittest.TestCase):
             self.assertTrue(numpy.abs(testLmst - controlLmst).max() < self.tolerance)
             self.assertTrue(numpy.abs(testLast - controlLast).max() < self.tolerance)
 
-        #test non-vectorized version
+        # test non-vectorized version
         for longitude in ll:
             for mm in self.mjd:
                 gmst, gast = utils.calcGmstGast(mm)
@@ -142,65 +143,61 @@ class testCoordinateTransformations(unittest.TestCase):
                 self.assertTrue(numpy.abs(testLmst - controlLmst) < self.tolerance)
                 self.assertTrue(numpy.abs(testLast - controlLast) < self.tolerance)
 
-
-
     def test_galacticFromEquatorial(self):
 
-        ra=numpy.zeros((3),dtype=float)
-        dec=numpy.zeros((3),dtype=float)
+        ra = numpy.zeros((3), dtype=float)
+        dec = numpy.zeros((3), dtype=float)
 
-        ra[0]=2.549091039839124218e+00
-        dec[0]=5.198752733024248895e-01
-        ra[1]=8.693375673649429425e-01
-        dec[1]=1.038086165642298164e+00
-        ra[2]=7.740864769302191473e-01
-        dec[2]=2.758053025017753179e-01
+        ra[0] = 2.549091039839124218e+00
+        dec[0] = 5.198752733024248895e-01
+        ra[1] = 8.693375673649429425e-01
+        dec[1] = 1.038086165642298164e+00
+        ra[2] = 7.740864769302191473e-01
+        dec[2] = 2.758053025017753179e-01
 
-        output=utils._galacticFromEquatorial(ra,dec)
+        output = utils._galacticFromEquatorial(ra, dec)
 
-        self.assertAlmostEqual(output[0][0],3.452036693523627964e+00,6)
-        self.assertAlmostEqual(output[1][0],8.559512505657201897e-01,6)
-        self.assertAlmostEqual(output[0][1],2.455968474619387720e+00,6)
-        self.assertAlmostEqual(output[1][1],3.158563770667878468e-02,6)
-        self.assertAlmostEqual(output[0][2],2.829585540991265358e+00,6)
-        self.assertAlmostEqual(output[1][2],-6.510790587552289788e-01,6)
+        self.assertAlmostEqual(output[0][0], 3.452036693523627964e+00, 6)
+        self.assertAlmostEqual(output[1][0], 8.559512505657201897e-01, 6)
+        self.assertAlmostEqual(output[0][1], 2.455968474619387720e+00, 6)
+        self.assertAlmostEqual(output[1][1], 3.158563770667878468e-02, 6)
+        self.assertAlmostEqual(output[0][2], 2.829585540991265358e+00, 6)
+        self.assertAlmostEqual(output[1][2], -6.510790587552289788e-01, 6)
 
     def test_equatorialFromGalactic(self):
 
-        lon=numpy.zeros((3),dtype=float)
-        lat=numpy.zeros((3),dtype=float)
+        lon = numpy.zeros((3), dtype=float)
+        lat = numpy.zeros((3), dtype=float)
 
-        lon[0]=3.452036693523627964e+00
-        lat[0]=8.559512505657201897e-01
-        lon[1]=2.455968474619387720e+00
-        lat[1]=3.158563770667878468e-02
-        lon[2]=2.829585540991265358e+00
-        lat[2]=-6.510790587552289788e-01
+        lon[0] = 3.452036693523627964e+00
+        lat[0] = 8.559512505657201897e-01
+        lon[1] = 2.455968474619387720e+00
+        lat[1] = 3.158563770667878468e-02
+        lon[2] = 2.829585540991265358e+00
+        lat[2] = -6.510790587552289788e-01
 
-        output=utils._equatorialFromGalactic(lon,lat)
+        output = utils._equatorialFromGalactic(lon, lat)
 
-        self.assertAlmostEqual(output[0][0],2.549091039839124218e+00,6)
-        self.assertAlmostEqual(output[1][0],5.198752733024248895e-01,6)
-        self.assertAlmostEqual(output[0][1],8.693375673649429425e-01,6)
-        self.assertAlmostEqual(output[1][1],1.038086165642298164e+00,6)
-        self.assertAlmostEqual(output[0][2],7.740864769302191473e-01,6)
-        self.assertAlmostEqual(output[1][2],2.758053025017753179e-01,6)
-
+        self.assertAlmostEqual(output[0][0], 2.549091039839124218e+00, 6)
+        self.assertAlmostEqual(output[1][0], 5.198752733024248895e-01, 6)
+        self.assertAlmostEqual(output[0][1], 8.693375673649429425e-01, 6)
+        self.assertAlmostEqual(output[1][1], 1.038086165642298164e+00, 6)
+        self.assertAlmostEqual(output[0][2], 7.740864769302191473e-01, 6)
+        self.assertAlmostEqual(output[1][2], 2.758053025017753179e-01, 6)
 
     def testCartesianFromSpherical(self):
-        arg1=2.19911485751
-        arg2=5.96902604182
-        output=utils.cartesianFromSpherical(arg1,arg2)
+        arg1 = 2.19911485751
+        arg2 = 5.96902604182
+        output = utils.cartesianFromSpherical(arg1, arg2)
 
-        vv=numpy.zeros((3),dtype=float)
-        vv[0]=numpy.cos(arg2)*numpy.cos(arg1)
-        vv[1]=numpy.cos(arg2)*numpy.sin(arg1)
-        vv[2]=numpy.sin(arg2)
+        vv = numpy.zeros((3), dtype=float)
+        vv[0] = numpy.cos(arg2)*numpy.cos(arg1)
+        vv[1] = numpy.cos(arg2)*numpy.sin(arg1)
+        vv[2] = numpy.sin(arg2)
 
-        self.assertAlmostEqual(output[0],vv[0],7)
-        self.assertAlmostEqual(output[1],vv[1],7)
-        self.assertAlmostEqual(output[2],vv[2],7)
-
+        self.assertAlmostEqual(output[0], vv[0], 7)
+        self.assertAlmostEqual(output[1], vv[1], 7)
+        self.assertAlmostEqual(output[2], vv[2], 7)
 
     def testSphericalFromCartesian(self):
         """
@@ -237,7 +234,6 @@ class testCoordinateTransformations(unittest.TestCase):
             self.assertAlmostEqual(numpy.cos(lat), numpy.cos(th), 5)
             self.assertAlmostEqual(numpy.sin(lat), numpy.sin(th), 5)
 
-
     def testCartesianFromSpherical(self):
         numpy.random.seed(42)
         nsamples = 10
@@ -252,7 +248,6 @@ class testCoordinateTransformations(unittest.TestCase):
 
             points.append(vv)
 
-
         points = numpy.array(points)
         lon, lat = utils.sphericalFromCartesian(points)
         outPoints = utils.cartesianFromSpherical(numpy.array(lon), numpy.array(lat))
@@ -266,32 +261,30 @@ class testCoordinateTransformations(unittest.TestCase):
         arg3 = 5.026548245743668986e+00
         arg4 = -6.283185307179586232e-01
 
-        output=utils.haversine(arg1,arg2,arg3,arg4)
+        output = utils.haversine(arg1, arg2, arg3, arg4)
 
-        self.assertAlmostEqual(output,2.162615946398791955e+00,10)
-
-
+        self.assertAlmostEqual(output, 2.162615946398791955e+00, 10)
 
     def testRotationMatrixFromVectors(self):
-        v1=numpy.zeros((3),dtype=float)
-        v2=numpy.zeros((3),dtype=float)
-        v3=numpy.zeros((3),dtype=float)
+        v1 = numpy.zeros((3), dtype=float)
+        v2 = numpy.zeros((3), dtype=float)
+        v3 = numpy.zeros((3), dtype=float)
 
-        v1[0]=-3.044619987218469825e-01
-        v2[0]=5.982190522311925385e-01
-        v1[1]=-5.473550908956383854e-01
-        v2[1]=-5.573565912346714057e-01
-        v1[2]=7.795545496018386755e-01
-        v2[2]=-5.757495946632366079e-01
+        v1[0] = -3.044619987218469825e-01
+        v2[0] = 5.982190522311925385e-01
+        v1[1] = -5.473550908956383854e-01
+        v2[1] = -5.573565912346714057e-01
+        v1[2] = 7.795545496018386755e-01
+        v2[2] = -5.757495946632366079e-01
 
-        output=utils.rotationMatrixFromVectors(v1,v2)
+        output = utils.rotationMatrixFromVectors(v1, v2)
 
         for i in range(3):
             for j in range(3):
-                v3[i]+=output[i][j]*v1[j]
+                v3[i] += output[i][j]*v1[j]
 
         for i in range(3):
-            self.assertAlmostEqual(v3[i],v2[i],7)
+            self.assertAlmostEqual(v3[i], v2[i], 7)
 
         v1 = numpy.array([1.0, 1.0, 1.0])
         self.assertRaises(RuntimeError, utils.rotationMatrixFromVectors, v1, v2)
@@ -305,6 +298,7 @@ def suite():
     suites += unittest.makeSuite(testCoordinateTransformations)
 
     return unittest.TestSuite(suites)
+
 
 def run(shouldExit=False):
     """Run the tests"""

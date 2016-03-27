@@ -3,12 +3,13 @@ This file defines classes that control who ObservationMetaData describes
 its field of view (i.e. is it a box in RA, Dec, is it a circle in RA, Dec....?)
 """
 
-#Hopefully it will be extensible so that we can add different shapes in the
-#future
+# Hopefully it will be extensible so that we can add different shapes in the
+# future
 
 import numpy as np
 
 __all__ = ["SpatialBounds", "CircleBounds", "BoxBounds"]
+
 
 class SpatialBoundsMetaClass(type):
     """
@@ -17,16 +18,16 @@ class SpatialBoundsMetaClass(type):
     dictionary key.
     """
 
-    #Largely this is being copied from the DBObjectMeta class in
-    #dbConnection.py
+    # Largely this is being copied from the DBObjectMeta class in
+    # dbConnection.py
 
     def __init__(cls, name, bases, dct):
-        if not hasattr(cls,'SBregistry'):
-            cls.SBregistry={}
+        if not hasattr(cls, 'SBregistry'):
+            cls.SBregistry = {}
         else:
             cls.SBregistry[cls.boundType] = cls
 
-        return super(SpatialBoundsMetaClass, cls).__init__(name,bases,dct)
+        return super(SpatialBoundsMetaClass, cls).__init__(name, bases, dct)
 
 
 class SpatialBounds(object):
@@ -106,8 +107,6 @@ class CircleBounds(SpatialBounds):
         @param[in] length is the radius of the field of view in radians
         """
 
-
-
         if not (isinstance(ra, float) or isinstance(ra, np.float)):
             try:
                 ra = np.float(ra)
@@ -134,7 +133,6 @@ class CircleBounds(SpatialBounds):
         self.DECdeg = np.degrees(dec)
         self.radiusdeg = np.degrees(radius)
 
-
     def __eq__(self, other):
         return (type(self) == type(other)) and \
                (self.RA == other.RA) and \
@@ -144,35 +142,36 @@ class CircleBounds(SpatialBounds):
                (self.DECdeg == other.DECdeg) and \
                (self.radiusdeg == other.radiusdeg)
 
-
     def to_SQL(self, RAname, DECname):
 
         if self.DECdeg != 90.0 and self.DECdeg != -90.0:
             RAmax = self.RAdeg + \
-            360.0 * np.arcsin(np.sin(0.5*self.radius) / np.cos(self.DEC))/np.pi
+                360.0 * np.arcsin(np.sin(0.5*self.radius) / np.cos(self.DEC))/np.pi
             RAmin = self.RAdeg - \
-            360.0 * np.arcsin(np.sin(0.5*self.radius) / np.cos(self.DEC))/np.pi
+                360.0 * np.arcsin(np.sin(0.5*self.radius) / np.cos(self.DEC))/np.pi
         else:
-           #just in case, for some reason, we are looking at the poles
-           RAmax = 360.0
-           RAmin = 0.0
+            # just in case, for some reason, we are looking at the poles
+            RAmax = 360.0
+            RAmin = 0.0
 
         DECmax = self.DECdeg + self.radiusdeg
         DECmin = self.DECdeg - self.radiusdeg
 
-        #initially demand that all objects are within a box containing the circle
-        #set from the DEC1=DEC2 and RA1=RA2 limits of the haversine function
+        # initially demand that all objects are within a box containing the circle
+        # set from the DEC1=DEC2 and RA1=RA2 limits of the haversine function
         bound = ("%s between %f and %f and %s between %f and %f "
-                     % (RAname, RAmin, RAmax, DECname, DECmin, DECmax))
+                 % (RAname, RAmin, RAmax, DECname, DECmin, DECmax))
 
-        #then use the Haversine function to constrain the angular distance form boresite to be within
-        #the desired radius.  See http://en.wikipedia.org/wiki/Haversine_formula
-        bound = bound + ("and 2 * ASIN(SQRT( POWER(SIN(0.5*(%s - %s) * PI() / 180.0),2)" % (DECname,self.DECdeg))
+        # then use the Haversine function to constrain the angular distance form boresite to be within
+        # the desired radius.  See http://en.wikipedia.org/wiki/Haversine_formula
+        bound = bound + ("and 2 * ASIN(SQRT( POWER(SIN(0.5*(%s - %s) * PI() / 180.0),2)" %
+                         (DECname, self.DECdeg))
         bound = bound + ("+ COS(%s * PI() / 180.0) * COS(%s * PI() / 180.0) " % (DECname, self.DECdeg))
         bound = bound + ("* POWER(SIN(0.5 * (%s - %s) * PI() / 180.0),2)))" % (RAname, self.RAdeg))
         bound = bound + (" < %s " % self.radius)
 
         return bound
+
 
 class BoxBounds(SpatialBounds):
 
@@ -226,7 +225,8 @@ class BoxBounds(SpatialBounds):
                 lengthDECdeg = np.degrees(length)
 
         except:
-            raise RuntimeError("BoxBounds is unsure how to handle length %s type: %s" % (str(length),type(length)))
+            raise RuntimeError("BoxBounds is unsure how to handle length %s type: %s" %
+                               (str(length), type(length)))
 
         self.RAminDeg = self.RAdeg - lengthRAdeg
         self.RAmaxDeg = self.RAdeg + lengthRAdeg
@@ -235,7 +235,6 @@ class BoxBounds(SpatialBounds):
 
         self.RAminDeg %= 360.0
         self.RAmaxDeg %= 360.0
-
 
     def __eq__(self, other):
         return (type(self) == type(other)) and \
@@ -248,14 +247,13 @@ class BoxBounds(SpatialBounds):
                (self.DECminDeg == other.DECminDeg) and \
                (self.DECmaxDeg == other.DECmaxDeg)
 
-
     def to_SQL(self, RAname, DECname):
-        #KSK:  I don't know exactly what we do here.  This is in code, but operating
-        #on a database is it less confusing to work in degrees or radians?
+        # KSK:  I don't know exactly what we do here.  This is in code, but operating
+        # on a database is it less confusing to work in degrees or radians?
         #(RAmin, RAmax, DECmin, DECmax) = map(math.radians,
         #                                     (RAmin, RAmax, DECmin, DECmax))
 
-        #Special case where the whole region is selected
+        # Special case where the whole region is selected
         if self.RAminDeg < 0 and self.RAmaxDeg > 360.:
             bound = "%s between %f and %f" % (DECname, self.DECminDeg, self.DECmaxDeg)
             return bound

@@ -8,8 +8,8 @@ from lsst.utils import getPackageDir
 
 __all__ = ["ModifiedJulianDate"]
 
-class ModifiedJulianDate(object):
 
+class ModifiedJulianDate(object):
 
     def __init__(self, TAI=None, UTC=None):
         """
@@ -40,10 +40,8 @@ class ModifiedJulianDate(object):
         self._ut1 = None
         self._dut1 = None
 
-
     def __eq__(self, other):
         return self._time == other._time
-
 
     @property
     def TAI(self):
@@ -55,7 +53,6 @@ class ModifiedJulianDate(object):
 
         return self._tai
 
-
     @property
     def UTC(self):
         """
@@ -65,8 +62,6 @@ class ModifiedJulianDate(object):
             self._utc = self._time.utc.mjd
 
         return self._utc
-
-
 
     @property
     def UT1(self):
@@ -82,7 +77,6 @@ class ModifiedJulianDate(object):
                 self._ut1 = self.UTC
 
         return self._ut1
-
 
     @property
     def dut1(self):
@@ -104,7 +98,6 @@ class ModifiedJulianDate(object):
 
         return self._dut1
 
-
     @property
     def TT(self):
         """
@@ -114,7 +107,6 @@ class ModifiedJulianDate(object):
             self._tt = self._time.tt.mjd
 
         return self._tt
-
 
     @property
     def TDB(self):

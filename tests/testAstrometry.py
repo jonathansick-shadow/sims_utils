@@ -29,8 +29,8 @@ from lsst.utils import getPackageDir
 
 from lsst.sims.utils import ObservationMetaData
 from lsst.sims.utils import _getRotTelPos, _raDecFromAltAz, calcObsDefaults, \
-                            radiansFromArcsec, arcsecFromRadians, Site, \
-                            raDecFromAltAz, haversine,ModifiedJulianDate
+    radiansFromArcsec, arcsecFromRadians, Site, \
+    raDecFromAltAz, haversine, ModifiedJulianDate
 
 from lsst.sims.utils import solarRaDec, _solarRaDec, distanceToSun, _distanceToSun
 from lsst.sims.utils import _applyPrecession, _applyProperMotion
@@ -39,8 +39,9 @@ from lsst.sims.utils import _observedFromICRS, _icrsFromObserved
 from lsst.sims.utils import _appGeoFromObserved, _icrsFromAppGeo
 from lsst.sims.utils import refractionCoefficients, applyRefraction
 
+
 def makeObservationMetaData():
-    #create a cartoon ObservationMetaData object
+    # create a cartoon ObservationMetaData object
     mjd = 52000.0
     alt = numpy.pi/2.0
     az = 0.0
@@ -52,24 +53,23 @@ def makeObservationMetaData():
     rotTel = _getRotTelPos(centerRA, centerDec, obsTemp, 0.0)
 
     obsDict = calcObsDefaults(centerRA, centerDec, alt, az, rotTel, mjd, band,
-                 testSite.longitude_rad, testSite.latitude_rad)
+                              testSite.longitude_rad, testSite.latitude_rad)
 
     obsDict['Opsim_expmjd'] = mjd
     radius = 0.1
     phoSimMetaData = OrderedDict([
-                      (k, (obsDict[k],numpy.dtype(type(obsDict[k])))) for k in obsDict])
+        (k, (obsDict[k], numpy.dtype(type(obsDict[k])))) for k in obsDict])
 
     obs_metadata = ObservationMetaData(boundType='circle', boundLength=2.0*radius,
                                        phoSimMetaData=phoSimMetaData, site=testSite)
 
-
-
     return obs_metadata
 
-def makeRandomSample(raCenter=None, decCenter=None, radius=None):
-    #create a random sample of object data
 
-    nsamples=100
+def makeRandomSample(raCenter=None, decCenter=None, radius=None):
+    # create a random sample of object data
+
+    nsamples = 100
     numpy.random.seed(32)
 
     if raCenter is None or decCenter is None or radius is None:
@@ -99,39 +99,38 @@ class astrometryUnitTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.metadata={}
+        self.metadata = {}
 
-        #below are metadata values that need to be set in order for
-        #get_getFocalPlaneCoordinates to work.  If we had been querying the database,
-        #these would be set to meaningful values.  Because we are generating
-        #an artificial set of inputs that must comport to the baseline SLALIB
-        #inputs, these are set arbitrarily by hand
+        # below are metadata values that need to be set in order for
+        # get_getFocalPlaneCoordinates to work.  If we had been querying the database,
+        # these would be set to meaningful values.  Because we are generating
+        # an artificial set of inputs that must comport to the baseline SLALIB
+        # inputs, these are set arbitrarily by hand
         self.metadata['pointingRA'] = (numpy.radians(200.0), float)
         self.metadata['pointingDec'] = (numpy.radians(-30.0), float)
         self.metadata['Opsim_rotskypos'] = (1.0, float)
 
         # these were the LSST site parameters as coded when this unit test was written
-        self.test_site=Site(longitude=numpy.degrees(-1.2320792),
-                            latitude=numpy.degrees(-0.517781017),
-                            height=2650.0,
-                            temperature=11.505,
-                            pressure=749.3,
-                            lapseRate=0.0065,
-                            humidity=0.4)
+        self.test_site = Site(longitude=numpy.degrees(-1.2320792),
+                              latitude=numpy.degrees(-0.517781017),
+                              height=2650.0,
+                              temperature=11.505,
+                              pressure=749.3,
+                              lapseRate=0.0065,
+                              humidity=0.4)
 
-        self.obs_metadata=ObservationMetaData(mjd=50984.371741,
-                                     boundType='circle',
-                                     boundLength=0.05,
-                                     phoSimMetaData=self.metadata,
-                                     site=self.test_site)
+        self.obs_metadata = ObservationMetaData(mjd=50984.371741,
+                                                boundType='circle',
+                                                boundLength=0.05,
+                                                phoSimMetaData=self.metadata,
+                                                site=self.test_site)
 
-        self.tol=1.0e-5
+        self.tol = 1.0e-5
 
     def tearDown(self):
         del self.obs_metadata
         del self.metadata
         del self.tol
-
 
     def testDistanceToSun(self):
         """
@@ -148,7 +147,7 @@ class astrometryUnitTest(unittest.TestCase):
         mjd_list = [57026.0, 57543.625]
 
         sun_ra_list = [18.0*hour + 56.0*minute + 51.022*second,
-                       4.0*hour + 51.0*minute + 22.776*second,]
+                       4.0*hour + 51.0*minute + 22.776*second, ]
 
         sun_dec_list = [numpy.radians(-22.0-47.0/60.0-40.27/3600.0),
                         numpy.radians(22.0+30.0/60.0+0.73/3600.0)]
@@ -201,17 +200,15 @@ class astrometryUnitTest(unittest.TestCase):
                 hh = haversine(raS, decS, new_ra, new_dec)
                 self.assertLess(numpy.abs(arcsecFromRadians(dd-hh)), 5.0)
 
-
     def testDistanceToSunDeg(self):
         """
         Test that distanceToSun is consistent with _distanceToSun
         """
 
         for mjd, ra, dec in zip((57632.1, 45623.4, 55682.3), (112.0, 24.0, 231.2), (-25.0, 23.4, -60.0)):
-             dd_deg = distanceToSun(ra, dec, mjd)
-             dd_rad = _distanceToSun(numpy.radians(ra), numpy.radians(dec), mjd)
-             self.assertAlmostEqual(numpy.radians(dd_deg), dd_rad, 10)
-
+            dd_deg = distanceToSun(ra, dec, mjd)
+            dd_rad = _distanceToSun(numpy.radians(ra), numpy.radians(dec), mjd)
+            self.assertAlmostEqual(numpy.radians(dd_deg), dd_rad, 10)
 
     def testSolarRaDecDeg(self):
         """
@@ -223,7 +220,6 @@ class astrometryUnitTest(unittest.TestCase):
             ra_rad, dec_rad = _solarRaDec(mjd)
             self.assertAlmostEqual(numpy.radians(ra_deg), ra_rad, 10)
             self.assertAlmostEqual(numpy.radians(dec_deg), dec_rad, 10)
-
 
     def testDistanceToSunArray(self):
         """
@@ -243,7 +239,7 @@ class astrometryUnitTest(unittest.TestCase):
         mjd_list = [57026.0, 57543.625]
 
         sun_ra_list = [18.0*hour + 56.0*minute + 51.022*second,
-                       4.0*hour + 51.0*minute + 22.776*second,]
+                       4.0*hour + 51.0*minute + 22.776*second, ]
 
         sun_dec_list = [numpy.radians(-22.0-47.0/60.0-40.27/3600.0),
                         numpy.radians(22.0+30.0/60.0+0.73/3600.0)]
@@ -251,11 +247,11 @@ class astrometryUnitTest(unittest.TestCase):
         for mjd, raS, decS in zip(mjd_list, sun_ra_list, sun_dec_list):
 
             ra_list = numpy.random.random_sample(nStars)*2.0*numpy.pi
-            dec_list =(numpy.random.random_sample(nStars)-0.5)*numpy.pi
+            dec_list = (numpy.random.random_sample(nStars)-0.5)*numpy.pi
             distance_list = _distanceToSun(ra_list, dec_list, mjd)
-            distance_control = haversine(ra_list, dec_list, numpy.array([raS]*nStars), numpy.array([decS]*nStars))
+            distance_control = haversine(ra_list, dec_list, numpy.array(
+                [raS]*nStars), numpy.array([decS]*nStars))
             numpy.testing.assert_array_almost_equal(distance_list, distance_control, 5)
-
 
     def testAstrometryExceptions(self):
         """
@@ -268,13 +264,12 @@ class astrometryUnitTest(unittest.TestCase):
         raShort = numpy.array([1.0])
         decShort = numpy.array([1.0])
 
-
-        ##########test refractionCoefficients
+        # test refractionCoefficients
         self.assertRaises(RuntimeError, refractionCoefficients)
         site = obs_metadata.site
         x, y = refractionCoefficients(site=site)
 
-        ##########test applyRefraction
+        # test applyRefraction
         zd = 0.1
         rzd = applyRefraction(zd, x, y)
 
@@ -284,20 +279,20 @@ class astrometryUnitTest(unittest.TestCase):
         zd = numpy.array([0.1, 0.2])
         rzd = applyRefraction(zd, x, y)
 
-        ##########test _applyPrecession
-        #test without mjd
+        # test _applyPrecession
+        # test without mjd
         self.assertRaises(RuntimeError, _applyPrecession, ra, dec)
 
-        #test mismatches
+        # test mismatches
         self.assertRaises(RuntimeError, _applyPrecession, raShort, dec,
                           mjd=ModifiedJulianDate(TAI=52000.0))
         self.assertRaises(RuntimeError, _applyPrecession, ra, decShort,
                           mjd=ModifiedJulianDate(TAI=52000.0))
 
-        #test that it runs
+        # test that it runs
         _applyPrecession(ra, dec, mjd=ModifiedJulianDate(TAI=52000.0))
 
-        ##########test _applyProperMotion
+        # test _applyProperMotion
         raList = list(ra)
         decList = list(dec)
         pm_raList = list(pm_ra)
@@ -310,11 +305,11 @@ class astrometryUnitTest(unittest.TestCase):
         parallaxShort = numpy.array([parallax[0]])
         v_radShort = numpy.array([v_rad[0]])
 
-        #test without mjd
+        # test without mjd
         self.assertRaises(RuntimeError, _applyProperMotion,
                           ra, dec, pm_ra, pm_dec, parallax, v_rad)
 
-        #test passing lists
+        # test passing lists
         self.assertRaises(RuntimeError, _applyProperMotion,
                           raList, dec, pm_ra, pm_dec, parallax, v_rad,
                           mjd=ModifiedJulianDate(TAI=52000.0))
@@ -334,7 +329,7 @@ class astrometryUnitTest(unittest.TestCase):
                           ra, dec, pm_ra, pm_dec, parallax, v_radList,
                           mjd=ModifiedJulianDate(TAI=52000.0))
 
-        #test mismatches
+        # test mismatches
         self.assertRaises(RuntimeError, _applyProperMotion,
                           raShort, dec, pm_ra, pm_dec, parallax, v_rad,
                           mjd=ModifiedJulianDate(TAI=52000.0))
@@ -354,99 +349,96 @@ class astrometryUnitTest(unittest.TestCase):
                           ra, dec, pm_ra, pm_dec, parallax, v_radShort,
                           mjd=ModifiedJulianDate(TAI=52000.0))
 
-        #test that it actually runs
+        # test that it actually runs
         _applyProperMotion(ra, dec, pm_ra, pm_dec, parallax, v_rad,
                            mjd=ModifiedJulianDate(TAI=52000.0))
         _applyProperMotion(ra[0], dec[0], pm_ra[0], pm_dec[0], parallax[0], v_rad[0],
-                          mjd=ModifiedJulianDate(TAI=52000.0))
+                           mjd=ModifiedJulianDate(TAI=52000.0))
 
-        ##########test _appGeoFromICRS
-        #test without mjd
+        # test _appGeoFromICRS
+        # test without mjd
         self.assertRaises(RuntimeError, _appGeoFromICRS, ra, dec)
 
-        #test with mismatched ra, dec
+        # test with mismatched ra, dec
         self.assertRaises(RuntimeError, _appGeoFromICRS, ra, decShort,
                           mjd=ModifiedJulianDate(TAI=52000.0))
         self.assertRaises(RuntimeError, _appGeoFromICRS, raShort, dec,
                           mjd=ModifiedJulianDate(TAI=52000.0))
 
-        #test that it actually urns
-        test=_appGeoFromICRS(ra, dec, mjd=obs_metadata.mjd)
+        # test that it actually urns
+        test = _appGeoFromICRS(ra, dec, mjd=obs_metadata.mjd)
 
-        ##########test _observedFromAppGeo
-        #test without obs_metadata
+        # test _observedFromAppGeo
+        # test without obs_metadata
         self.assertRaises(RuntimeError, _observedFromAppGeo, ra, dec)
 
-        #test without site
-        dummy=ObservationMetaData(pointingRA=obs_metadata.pointingRA,
-                                  pointingDec=obs_metadata.pointingDec,
-                                  mjd=obs_metadata.mjd,
-                                  site=None)
+        # test without site
+        dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
+                                    pointingDec=obs_metadata.pointingDec,
+                                    mjd=obs_metadata.mjd,
+                                    site=None)
         self.assertRaises(RuntimeError, _observedFromAppGeo, ra, dec, obs_metadata=dummy)
 
-        #test without mjd
-        dummy=ObservationMetaData(pointingRA=obs_metadata.pointingRA,
-                                  pointingDec=obs_metadata.pointingDec,
-                                  site=Site(name='LSST'))
+        # test without mjd
+        dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
+                                    pointingDec=obs_metadata.pointingDec,
+                                    site=Site(name='LSST'))
         self.assertRaises(RuntimeError, _observedFromAppGeo, ra, dec, obs_metadata=dummy)
 
-        #test mismatches
-        dummy=ObservationMetaData(pointingRA=obs_metadata.pointingRA,
-                                  pointingDec=obs_metadata.pointingDec,
-                                  mjd=obs_metadata.mjd,
-                                  site=Site(name='LSST'))
+        # test mismatches
+        dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
+                                    pointingDec=obs_metadata.pointingDec,
+                                    mjd=obs_metadata.mjd,
+                                    site=Site(name='LSST'))
 
         self.assertRaises(RuntimeError, _observedFromAppGeo, ra, decShort, obs_metadata=dummy)
         self.assertRaises(RuntimeError, _observedFromAppGeo, raShort, dec, obs_metadata=dummy)
 
-        #test that it actually runs
+        # test that it actually runs
         test = _observedFromAppGeo(ra, dec, obs_metadata=dummy)
 
-        ##########test _observedFromICRS
-        #test without epoch
+        # test _observedFromICRS
+        # test without epoch
         self.assertRaises(RuntimeError, _observedFromICRS, ra, dec, obs_metadata=obs_metadata)
 
-        #test without obs_metadata
+        # test without obs_metadata
         self.assertRaises(RuntimeError, _observedFromICRS, ra, dec, epoch=2000.0)
 
-        #test without mjd
-        dummy=ObservationMetaData(pointingRA=obs_metadata.pointingRA,
-                                  pointingDec=obs_metadata.pointingDec,
-                                  site=obs_metadata.site)
+        # test without mjd
+        dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
+                                    pointingDec=obs_metadata.pointingDec,
+                                    site=obs_metadata.site)
         self.assertRaises(RuntimeError, _observedFromICRS, ra, dec, epoch=2000.0, obs_metadata=dummy)
 
-        #test that it actually runs
-        dummy=ObservationMetaData(pointingRA=obs_metadata.pointingRA,
-                                  pointingDec=obs_metadata.pointingDec,
-                                  site=obs_metadata.site,
-                                  mjd=obs_metadata.mjd)
+        # test that it actually runs
+        dummy = ObservationMetaData(pointingRA=obs_metadata.pointingRA,
+                                    pointingDec=obs_metadata.pointingDec,
+                                    site=obs_metadata.site,
+                                    mjd=obs_metadata.mjd)
 
-        #test mismatches
+        # test mismatches
         self.assertRaises(RuntimeError, _observedFromICRS, ra, decShort, epoch=2000.0, obs_metadata=dummy)
         self.assertRaises(RuntimeError, _observedFromICRS, raShort, dec, epoch=2000.0, obs_metadata=dummy)
 
-        #test that it actually runs
+        # test that it actually runs
         test = _observedFromICRS(ra, dec, obs_metadata=dummy, epoch=2000.0)
-
-
 
     def test_applyPrecession(self):
 
-        ra=numpy.zeros((3),dtype=float)
-        dec=numpy.zeros((3),dtype=float)
+        ra = numpy.zeros((3), dtype=float)
+        dec = numpy.zeros((3), dtype=float)
 
-        ra[0]=2.549091039839124218e+00
-        dec[0]=5.198752733024248895e-01
-        ra[1]=8.693375673649429425e-01
-        dec[1]=1.038086165642298164e+00
-        ra[2]=7.740864769302191473e-01
-        dec[2]=2.758053025017753179e-01
+        ra[0] = 2.549091039839124218e+00
+        dec[0] = 5.198752733024248895e-01
+        ra[1] = 8.693375673649429425e-01
+        dec[1] = 1.038086165642298164e+00
+        ra[2] = 7.740864769302191473e-01
+        dec[2] = 2.758053025017753179e-01
 
         self.assertRaises(RuntimeError, _applyPrecession, ra, dec)
 
-        #just make sure it runs
-        output=_applyPrecession(ra,dec, mjd=ModifiedJulianDate(TAI=57388.0))
-
+        # just make sure it runs
+        output = _applyPrecession(ra, dec, mjd=ModifiedJulianDate(TAI=57388.0))
 
     def test_applyProperMotion(self):
         """
@@ -454,8 +446,8 @@ class astrometryUnitTest(unittest.TestCase):
         generated by recreating the 'space motion' section of code
         from palMapqk.c in palpy/cextern/pal
         """
-        VF=0.21094502
-        pal_das2r=4.8481368110953599358991410235794797595635330237270e-6;
+        VF = 0.21094502
+        pal_das2r = 4.8481368110953599358991410235794797595635330237270e-6
 
         numpy.random.seed(18)
         nSamples = 1000
@@ -472,12 +464,10 @@ class astrometryUnitTest(unittest.TestCase):
             y_list_icrs = numpy.cos(decList_icrs)*numpy.sin(raList_icrs)
             z_list_icrs = numpy.sin(decList_icrs)
 
-
             pm_ra = (numpy.random.random_sample(nSamples)-0.5)*radiansFromArcsec(1.0)
             pm_dec = (numpy.random.random_sample(nSamples)-0.5)*radiansFromArcsec(1.0)
             px = numpy.random.random_sample(nSamples)*radiansFromArcsec(1.0)
             v_rad = numpy.random.random_sample(nSamples)*200.0
-
 
             ra_list_pm, dec_list_pm = _applyProperMotion(raList_icrs, decList_icrs,
                                                          pm_ra*numpy.cos(decList_icrs),
@@ -499,9 +489,9 @@ class astrometryUnitTest(unittest.TestCase):
             w = VF*v_rad*pxr
 
             motion_per_year = numpy.array([-1.0*pm_ra*y_list_icrs - pm_dec*numpy.cos(raList_icrs)*numpy.sin(decList_icrs) + w*x_list_icrs,
-                                     pm_ra*x_list_icrs - pm_dec*numpy.sin(raList_icrs)*numpy.sin(decList_icrs) + w*y_list_icrs,
-                                     pm_dec*numpy.cos(decList_icrs) + w*z_list_icrs])
-
+                                           pm_ra*x_list_icrs - pm_dec *
+                                           numpy.sin(raList_icrs)*numpy.sin(decList_icrs) + w*y_list_icrs,
+                                           pm_dec*numpy.cos(decList_icrs) + w*z_list_icrs])
 
             xyz_control = numpy.array([
                                       x_list_icrs + pmt*motion_per_year[0] - pxr*eb[0],
@@ -509,7 +499,8 @@ class astrometryUnitTest(unittest.TestCase):
                                       z_list_icrs + pmt*motion_per_year[2] - pxr*eb[2]
                                       ])
 
-            xyz_norm = numpy.sqrt(numpy.power(xyz_control[0],2) + numpy.power(xyz_control[1],2) + numpy.power(xyz_control[2],2))
+            xyz_norm = numpy.sqrt(numpy.power(
+                xyz_control[0], 2) + numpy.power(xyz_control[1], 2) + numpy.power(xyz_control[2], 2))
 
             # stars' Cartesian position after applying the control proper motion method
             xyz_control[0] = xyz_control[0]/xyz_norm
@@ -518,23 +509,22 @@ class astrometryUnitTest(unittest.TestCase):
 
             # this is the Cartesian distance between the stars' positions as found by _applyProperMotion
             # and the distance as found by the control proper motion code above
-            distance = numpy.sqrt(numpy.power(x_list_pm-xyz_control[0],2) + numpy.power(y_list_pm-xyz_control[1],2) +
-                                  numpy.power(z_list_pm-xyz_control[2],2))
+            distance = numpy.sqrt(numpy.power(x_list_pm-xyz_control[0], 2) + numpy.power(y_list_pm-xyz_control[1], 2) +
+                                  numpy.power(z_list_pm-xyz_control[2], 2))
 
             # this is the Cartesian distance between the stars' original positions on the celestial sphere
             # and their positions after the control proper motion was applied
-            correction = numpy.sqrt(numpy.power(xyz_control[0]-x_list_icrs,2) + numpy.power(xyz_control[1]-y_list_icrs,2) +
-                                    numpy.power(xyz_control[2]-z_list_icrs,2))
+            correction = numpy.sqrt(numpy.power(xyz_control[0]-x_list_icrs, 2) + numpy.power(xyz_control[1]-y_list_icrs, 2) +
+                                    numpy.power(xyz_control[2]-z_list_icrs, 2))
 
             dex = numpy.argmax(distance)
             msg = 'pm %e %e vr %e px %e; time %e; err %e arcsec; corr %e' % \
-            (arcsecFromRadians(pm_ra[dex]), arcsecFromRadians(pm_dec[dex]),
-             v_rad[dex], arcsecFromRadians(px[dex]), pmt, arcsecFromRadians(distance[dex]),
-             arcsecFromRadians(correction[dex]))
+                (arcsecFromRadians(pm_ra[dex]), arcsecFromRadians(pm_dec[dex]),
+                 v_rad[dex], arcsecFromRadians(px[dex]), pmt, arcsecFromRadians(distance[dex]),
+                 arcsecFromRadians(correction[dex]))
 
             self.assertLess((distance/correction).max(), 0.01, msg=msg)
             # demand that the two methods agree on the stars' new positions to within one part in 100
-
 
     def test_appGeoFromICRS(self):
         """
@@ -602,12 +592,11 @@ class astrometryUnitTest(unittest.TestCase):
             distance = arcsecFromRadians(haversine(ra_app, dec_app, ra_test[0], dec_test[0]))
             self.assertLess(distance, 0.1)
 
-
         # test on Sirius
         # data taken from
         # http://simbad.u-strasbg.fr/simbad/sim-id?Ident=Sirius
         ra_icrs = 6.0*hours + 45.0*minutes + 8.91728*seconds
-        dec_icrs = numpy.radians(-16.0 - 42.0/60.0 -58.0171/3600.0)
+        dec_icrs = numpy.radians(-16.0 - 42.0/60.0 - 58.0171/3600.0)
         pm_ra = radiansFromArcsec(-0.54601)
         pm_dec = radiansFromArcsec(-1.22307)
         px = radiansFromArcsec(0.37921)
@@ -646,8 +635,6 @@ class astrometryUnitTest(unittest.TestCase):
             distance = arcsecFromRadians(haversine(ra_app, dec_app, ra_test[0], dec_test[0]))
             self.assertLess(distance, 0.1)
 
-
-
     def test_icrsFromAppGeo(self):
         """
         Test that _icrsFromAppGeo really inverts _appGeoFromICRS.
@@ -665,13 +652,12 @@ class astrometryUnitTest(unittest.TestCase):
         numpy.random.seed(412)
         nSamples = 100
 
-        mjd2000 = pal.epb(2000.0) # convert epoch to mjd
+        mjd2000 = pal.epb(2000.0)  # convert epoch to mjd
 
         for mjd in (53000.0, 53241.6, 58504.6):
 
             ra_in = numpy.random.random_sample(nSamples)*2.0*numpy.pi
             dec_in = (numpy.random.random_sample(nSamples)-0.5)*numpy.pi
-
 
             ra_app, dec_app = _appGeoFromICRS(ra_in, dec_in, mjd=ModifiedJulianDate(TAI=mjd))
 
@@ -681,15 +667,14 @@ class astrometryUnitTest(unittest.TestCase):
             self.assertFalse(numpy.isnan(ra_icrs).any())
             self.assertFalse(numpy.isnan(dec_icrs).any())
 
-            valid_pts = numpy.where(_distanceToSun(ra_in, dec_in, mjd)>0.25*numpy.pi)[0]
+            valid_pts = numpy.where(_distanceToSun(ra_in, dec_in, mjd) > 0.25*numpy.pi)[0]
 
             self.assertGreater(len(valid_pts), 0)
 
             distance = arcsecFromRadians(pal.dsepVector(ra_in[valid_pts], dec_in[valid_pts],
-                                         ra_icrs[valid_pts], dec_icrs[valid_pts]))
+                                                        ra_icrs[valid_pts], dec_icrs[valid_pts]))
 
             self.assertLess(distance.max(), 0.01)
-
 
     def test_icrsFromObserved(self):
         """
@@ -702,7 +687,7 @@ class astrometryUnitTest(unittest.TestCase):
         numpy.random.seed(412)
         nSamples = 100
 
-        mjd2000 = pal.epb(2000.0) # convert epoch to mjd
+        mjd2000 = pal.epb(2000.0)  # convert epoch to mjd
 
         site = Site(name='LSST')
 
@@ -733,27 +718,25 @@ class astrometryUnitTest(unittest.TestCase):
                                                               includeRefraction=includeRefraction,
                                                               epoch=2000.0)
 
-                        valid_pts = numpy.where(_distanceToSun(ra_in, dec_in, mjd)>0.25*numpy.pi)[0]
+                        valid_pts = numpy.where(_distanceToSun(ra_in, dec_in, mjd) > 0.25*numpy.pi)[0]
 
                         self.assertGreater(len(valid_pts), 0)
 
                         distance = arcsecFromRadians(pal.dsepVector(ra_in[valid_pts], dec_in[valid_pts],
-                                                     ra_icrs[valid_pts], dec_icrs[valid_pts]))
+                                                                    ra_icrs[valid_pts], dec_icrs[valid_pts]))
 
                         self.assertLess(distance.max(), 0.01)
-
 
                         # test a round-trip between observedFromAppGeo and appGeoFromObserved
                         ra_obs, dec_obs = _observedFromAppGeo(ra_in, dec_in, obs_metadata=obs,
                                                               includeRefraction=includeRefraction)
                         ra_app, dec_app = _appGeoFromObserved(ra_obs, dec_obs, obs_metadata=obs,
-                                                                includeRefraction=includeRefraction)
+                                                              includeRefraction=includeRefraction)
 
                         distance = arcsecFromRadians(pal.dsepVector(ra_in[valid_pts], dec_in[valid_pts],
-                                                     ra_app[valid_pts], dec_app[valid_pts]))
+                                                                    ra_app[valid_pts], dec_app[valid_pts]))
 
                         self.assertLess(distance.max(), 0.01)
-
 
     def test_icrsFromObservedExceptions(self):
         """
@@ -784,7 +767,6 @@ class astrometryUnitTest(unittest.TestCase):
             ra_out, dec_out = _icrsFromObserved(ra_in[:3], dec_in, obs_metadata=obs, epoch=2000.0)
         self.assertEqual(context.exception.args[0],
                          "You passed 3 RAs but 10 Decs to icrsFromObserved")
-
 
     def test_appGeoFromObserved(self):
         """
@@ -825,17 +807,15 @@ class astrometryUnitTest(unittest.TestCase):
                                                       wavelength=wavelength,
                                                       includeRefraction=includeRefraction)
 
-
                 xx_out = numpy.cos(dec_out)*numpy.cos(ra_out)
                 yy_out = numpy.cos(dec_out)*numpy.sin(ra_out)
                 zz_out = numpy.sin(dec_out)
 
-                distance = numpy.sqrt(numpy.power(xx_in-xx_out,2) +
-                                      numpy.power(yy_in-yy_out,2) +
-                                      numpy.power(zz_in-zz_out,2))
+                distance = numpy.sqrt(numpy.power(xx_in-xx_out, 2) +
+                                      numpy.power(yy_in-yy_out, 2) +
+                                      numpy.power(zz_in-zz_out, 2))
 
                 self.assertLess(distance.max(), 1.0e-12)
-
 
     def test_appGeoFromObservedExceptions(self):
         """
@@ -871,20 +851,18 @@ class astrometryUnitTest(unittest.TestCase):
         self.assertEqual(context.exception.args[0],
                          "You passed 2 RAs but 10 Decs to appGeoFromObserved")
 
-
     def testRefractionCoefficients(self):
-        output=refractionCoefficients(wavelength=5000.0, site=self.obs_metadata.site)
+        output = refractionCoefficients(wavelength=5000.0, site=self.obs_metadata.site)
 
-        self.assertAlmostEqual(output[0],2.295817926320665320e-04,6)
-        self.assertAlmostEqual(output[1],-2.385964632924575670e-07,6)
+        self.assertAlmostEqual(output[0], 2.295817926320665320e-04, 6)
+        self.assertAlmostEqual(output[1], -2.385964632924575670e-07, 6)
 
     def testApplyRefraction(self):
-        coeffs=refractionCoefficients(wavelength=5000.0, site=self.obs_metadata.site)
+        coeffs = refractionCoefficients(wavelength=5000.0, site=self.obs_metadata.site)
 
-        output=applyRefraction(0.25*numpy.pi,coeffs[0],coeffs[1])
+        output = applyRefraction(0.25*numpy.pi, coeffs[0], coeffs[1])
 
-        self.assertAlmostEqual(output,7.851689251070859132e-01,6)
-
+        self.assertAlmostEqual(output, 7.851689251070859132e-01, 6)
 
 
 def suite():
@@ -893,8 +871,9 @@ def suite():
     suites += unittest.makeSuite(astrometryUnitTest)
     return unittest.TestSuite(suites)
 
+
 def run(shouldExit=False):
-    utilsTests.run(suite(),shouldExit)
+    utilsTests.run(suite(), shouldExit)
 
 if __name__ == "__main__":
     run(True)

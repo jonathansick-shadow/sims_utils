@@ -51,7 +51,7 @@ def calcLmstLast(mjd, longRad):
     longDeg0 %= 360.0
 
     if longRadIsArray:
-        longDeg = numpy.where(longDeg0>180.0, longDeg0-360.0, longDeg0)
+        longDeg = numpy.where(longDeg0 > 180.0, longDeg0-360.0, longDeg0)
     else:
         if longDeg0 > 180.:
             longDeg = longDeg0-360.
@@ -163,8 +163,8 @@ def cartesianFromSpherical(longitude, latitude):
 
     cosDec = numpy.cos(latitude)
     return numpy.array([numpy.cos(longitude)*cosDec,
-                      numpy.sin(longitude)*cosDec,
-                      numpy.sin(latitude)]).transpose()
+                        numpy.sin(longitude)*cosDec,
+                        numpy.sin(latitude)]).transpose()
 
 
 def sphericalFromCartesian(xyz):
@@ -182,12 +182,12 @@ def sphericalFromCartesian(xyz):
     if not isinstance(xyz, numpy.ndarray):
         raise RuntimeError("you need to pass a numpy array to sphericalFromCartesian")
 
-    if len(xyz.shape)>1:
-        rad = numpy.sqrt(numpy.power(xyz,2).sum(axis=1))
-        longitude = numpy.arctan2( xyz[:,1], xyz[:,0])
-        latitude = numpy.arcsin( xyz[:,2] / rad)
+    if len(xyz.shape) > 1:
+        rad = numpy.sqrt(numpy.power(xyz, 2).sum(axis=1))
+        longitude = numpy.arctan2(xyz[:, 1], xyz[:, 0])
+        latitude = numpy.arcsin(xyz[:, 2] / rad)
     else:
-        rad = numpy.sqrt(numpy.dot(xyz,xyz))
+        rad = numpy.sqrt(numpy.dot(xyz, xyz))
         longitude = numpy.arctan2(xyz[1], xyz[0])
         latitude = numpy.arcsin(xyz[2]/rad)
 
@@ -204,29 +204,29 @@ def rotationMatrixFromVectors(v1, v2):
 
     '''
 
-    if numpy.abs(numpy.sqrt(numpy.dot(v1,v1))-1.0) > 0.01:
+    if numpy.abs(numpy.sqrt(numpy.dot(v1, v1))-1.0) > 0.01:
         raise RuntimeError("v1 in rotationMatrixFromVectors is not a unit vector")
 
-    if numpy.abs(numpy.sqrt(numpy.dot(v2,v2))-1.0) > 0.01:
+    if numpy.abs(numpy.sqrt(numpy.dot(v2, v2))-1.0) > 0.01:
         raise RuntimeError("v2 in rotationMatrixFromVectors is not a unit vector")
 
     # Calculate the axis of rotation by the cross product of v1 and v2
-    cross = numpy.cross(v1,v2)
-    cross = cross / numpy.sqrt(numpy.dot(cross,cross))
+    cross = numpy.cross(v1, v2)
+    cross = cross / numpy.sqrt(numpy.dot(cross, cross))
 
     # calculate the angle of rotation via dot product
-    angle  = numpy.arccos(numpy.dot(v1,v2))
+    angle = numpy.arccos(numpy.dot(v1, v2))
     sinDot = numpy.sin(angle)
     cosDot = numpy.cos(angle)
 
     # calculate the corresponding rotation matrix
     # http://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
-    rot = [[cosDot + cross[0]*cross[0]*(1-cosDot), -cross[2]*sinDot+(1-cosDot)*cross[0]*cross[1], \
-            cross[1]*sinDot + (1-cosDot)*cross[0]*cross[2]],\
-            [cross[2]*sinDot+(1-cosDot)*cross[0]*cross[1], cosDot + (1-cosDot)*cross[1]*cross[1], \
-            -cross[0]*sinDot+(1-cosDot)*cross[1]*cross[2]], \
-            [-cross[1]*sinDot+(1-cosDot)*cross[0]*cross[2], \
-            cross[0]*sinDot+(1-cosDot)*cross[1]*cross[2], \
+    rot = [[cosDot + cross[0]*cross[0]*(1-cosDot), -cross[2]*sinDot+(1-cosDot)*cross[0]*cross[1],
+            cross[1]*sinDot + (1-cosDot)*cross[0]*cross[2]],
+           [cross[2]*sinDot+(1-cosDot)*cross[0]*cross[1], cosDot + (1-cosDot)*cross[1]*cross[1],
+            -cross[0]*sinDot+(1-cosDot)*cross[1]*cross[2]],
+           [-cross[1]*sinDot+(1-cosDot)*cross[0]*cross[2],
+            cross[0]*sinDot+(1-cosDot)*cross[1]*cross[2],
             cosDot + (1-cosDot)*(cross[2]*cross[2])]]
 
     return rot
